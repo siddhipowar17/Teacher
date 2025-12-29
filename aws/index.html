@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+        <h2 class="logo">EduTech</h2>
+        <ul>
+            <li class="active" onclick="showSection('dashboard', this)">Dashboard</li>
+
+            <li class="has-submenu" onclick="toggleSubmenu(this)">
+                Teacher Info ▾
+                <ul class="submenu">
+                    <li onclick="showSection('personalInfo', this)">Personal Info</li>
+                    <li onclick="showSection('subjectsInfo', this)">Subjects</li>
+                    <li onclick="showSection('teacherSchedule', this)">Schedule</li>
+                </ul>
+            </li>
+
+            <li onclick="showSection('students', this)">Students</li>
+            <li onclick="showSection('attendance', this)">Attendance</li>
+            <li onclick="showSection('addStudent', this)">Add Student</li>
+            <li onclick="showSection('courses', this)">Courses</li>
+            <li onclick="showSection('schedule', this)">Schedule</li>
+            <li onclick="showSection('marks', this)">Marks</li>
+            <li onclick="showSection('notifications', this)">Notifications</li>
+
+            <li class="logout">Logout</li>
+        </ul>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <main class="main">
+
+      <div class="admin-box" onclick="toggleAdminInfo(event)">
+    <div class="admin-avatar">Siddhi</div>
+    <div class="admin-info" id="adminInfo">
+        <p><strong>Name:</strong> Siddhi</p>
+        <p><strong>Department:</strong> Mathematics</p>
+        <p><strong>Role:</strong> Teacher</p>
+    </div>
+</div>
+
+<style>
+.admin-box { position: fixed; top: 10px; right: 10px; z-index: 999; cursor: pointer; }
+.admin-avatar { background:#1e2a40; color:#eaf2ff; padding:8px 12px; border-radius:20px; font-weight:600; font-size:14px; box-shadow:0 3px 6px rgba(0,0,0,0.3); transition:0.2s; }
+.admin-avatar:hover { background:#2a3a5f; }
+.admin-info { max-height:0; overflow:hidden; opacity:0; transition:all 0.3s ease; position:absolute; top:45px; right:0; background:#0f223d; color:#eaf2ff; padding:0 12px; border-radius:8px; width:max-content; box-shadow:0 4px 10px rgba(0,0,0,0.3); font-size:13px; }
+.admin-info.show { max-height:200px; opacity:1; padding:8px 12px; }
+@media(max-width:480px){ .admin-avatar{font-size:12px;padding:6px 10px;} .admin-info{top:40px;font-size:12px;padding:0 8px;} .admin-info.show{padding:6px 8px;} }
+</style>
+
+<script>
+function toggleAdminInfo(e){ e.stopPropagation(); document.getElementById('adminInfo').classList.toggle('show'); }
+document.addEventListener('click', function(e){ if(!document.querySelector('.admin-box').contains(e.target)){ document.getElementById('adminInfo').classList.remove('show'); }});
+</script>
+
+
+
+
+        <!-- ================= DASHBOARD ================= -->
+        <section id="dashboard" class="content active">
+            <div class="cards">
+                <div class="card"><h3>Total Students</h3><p id="totalStudents">0</p></div>
+                <div class="card"><h3>Present Today</h3><p id="presentToday">—</p></div>
+                <div class="card"><h3>Pending Tasks</h3><p>3</p></div>
+                <div class="card"><h3>Absent Today</h3><p id="absentToday">2</p></div>
+                <div class="card"><h3>Upcoming Exam</h3><p>Maths - 24 Dec</p></div>
+                <div class="card"><h3>Messages</h3><p></p></div>
+            </div>
+
+            <h2 style="margin-top:20px;">📊 Attendance Overview</h2>
+            <div style="width:300px; height:250px; margin-top:10px;">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+
+            <h2 style="margin-top:20px;">📅 Today’s Schedule</h2>
+            <table>
+                <tr><th>Time</th><th>Subject</th><th>Class</th></tr>
+                <tr><td>09:00 AM</td><td>Maths</td><td>10-A</td></tr>
+                <tr><td>11:00 AM</td><td>Science</td><td>10-B</td></tr>
+            </table>
+        </section>
+
+        <!-- ================= PERSONAL INFO ================= -->
+        <section id="personalInfo" class="content">
+            <h1 class="section-title">Personal Information</h1>
+
+            <div class="profile-wrapper">
+                <div class="profile-card">
+
+                    <div class="profile-header">
+                        <div class="avatar">JD</div>
+                        <div>
+                            <h2>siddhi</h2>
+                            <p>Mathematics Department</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail">
+                            <span>Email</span>
+                            <p>siddhi@gmail.com</p>
+                        </div>
+
+                        <div class="detail">
+                            <span>Experience</span>
+                            <p>10 Years</p>
+                        </div>
+
+                        <div class="detail">
+                            <span>Role</span>
+                            <p>Senior Teacher</p>
+                        </div>
+
+                        <div class="detail">
+                            <span>Status</span>
+                            <p class="active">Active</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SUBJECTS ================= -->
+        <section id="subjectsInfo" class="content">
+            <h1>📚 Subjects</h1>
+            <div class="form-card">
+                <ul>
+                    <li>Mathematics</li>
+                    <li>Science</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ================= TEACHER SCHEDULE ================= -->
+        <section id="teacherSchedule" class="content">
+            <h1>📅 Teacher Schedule</h1>
+            <table>
+                <tr><th>Day</th><th>Time</th><th>Subject</th><th>Class</th></tr>
+                <tr><td>Monday</td><td>09:00 AM</td><td>Maths</td><td>10-A</td></tr>
+                <tr><td>Tuesday</td><td>11:00 AM</td><td>Science</td><td>10-B</td></tr>
+            </table>
+        </section>
+
+        <!-- ================= STUDENTS ================= -->
+        <section id="students" class="content">
+            <h1 style="text-align:center; color:#4fc3ff;">Student Details</h1>
+            <div class="buttons" style="text-align:center; margin:40px 0;">
+                <button class="btn large-btn" onclick="renderStudents('Maths','10-A')">Maths 10-A</button>
+                <button class="btn large-btn" onclick="renderStudents('Science','10-B')">Science 10-B</button>
+            </div>
+            <div id="student-info" style="margin-top:40px;"></div>
+        </section>
+
+        <!-- ================= ATTENDANCE ================= -->
+        <section id="attendance" class="content">
+            <h1 style="text-align:center; color:#4fc3ff;">Attendance</h1>
+            <div class="buttons" style="text-align:center; margin:40px 0;">
+                <button class="btn large-btn" onclick="renderAttendance('Maths','10-A')">Maths 10-A</button>
+                <button class="btn large-btn" onclick="renderAttendance('Science','10-B')">Science 10-B</button>
+            </div>
+            <div id="attendance-info" style="margin-top:40px;"></div>
+        </section>
+
+        <!-- ================= MARKS ================= -->
+        <section id="marks" class="content">
+            <h1 style="text-align:center; color:#4fc3ff;">Student Performance</h1>
+            <div class="buttons" style="text-align:center; margin:40px 0;">
+                <button class="btn large-btn" onclick="renderMarks('Maths','10-A')">Maths 10-A</button>
+                <button class="btn large-btn" onclick="renderMarks('Science','10-B')">Science 10-B</button>
+            </div>
+            <div id="marks-info" style="margin-top:40px;"></div>
+        </section>
+
+        <!-- ================= COURSES ================= -->
+        <section id="courses" class="content">
+            <h1>Courses</h1>
+            <table>
+                <tr><th>Course</th><th>Class</th><th>Duration</th></tr>
+                <tr><td>Mathematics</td><td>10-A</td><td>6 Months</td></tr>
+                <tr><td>Science</td><td>10-B</td><td>6 Months</td></tr>
+            </table>
+        </section>
+
+        <!-- ================= SCHEDULE ================= -->
+        <section id="schedule" class="content">
+            <h1>Schedule</h1>
+            <table>
+                <tr><th>Day</th><th>Time</th><th>Subject</th><th>Class</th></tr>
+                <tr><td>Monday</td><td>09:00 AM</td><td>Maths</td><td>10-A</td></tr>
+                <tr><td>Tuesday</td><td>11:00 AM</td><td>Science</td><td>10-B</td></tr>
+            </table>
+        </section>
+
+        <!-- ================= ADD STUDENT ================= -->
+        <section id="addStudent" class="content">
+            <h1 class="section-title">Add Student</h1>
+            <div class="add-student-wrapper">
+                <div class="form-card premium-card">
+                    <div class="form-header">
+                        <h2>Student Registration</h2>
+                        <p>Enter student details below</p>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="studentName" required>
+                        <label>Student Name</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="studentClass" required>
+                        <label>Class (Eg: 10-A)</label>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="email" id="studentEmail" required>
+                        <label>Email Address</label>
+                    </div>
+
+                    <button class="btn glow-btn" onclick="addStudent()">Add Student</button>
+
+                    <div id="studentMsg"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= NOTIFICATIONS ================= -->
+        <section id="notifications" class="content">
+            <h1 class="section-title">Notifications</h1>
+            <div class="notifications-wrapper">
+                <div class="notification-card new">
+                    <div class="icon">📢</div>
+                    <div class="notification-text">
+                        <h3>Parent Meeting</h3>
+                        <p>Parent meeting is scheduled on Friday at 10:00 AM.</p>
+                        <span class="time">Today • 9:30 AM</span>
+                    </div>
+                    <button class="close-btn" onclick="removeNotification(this)">✕</button>
+                </div>
+
+                <div class="notification-card important">
+                    <div class="icon">📌</div>
+                    <div class="notification-text">
+                        <h3>Submit Internal Marks</h3>
+                        <p>Please submit internal marks before end of the day.</p>
+                        <span class="time">Yesterday • 6:15 PM</span>
+                    </div>
+                    <button class="close-btn" onclick="removeNotification(this)">✕</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- External JS -->
+<script src="script.js"></script>
+</body>
+</html>
