@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+{% block title %}AI Analysis - AI Blockchain IoT{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🤖 AI Anomaly Detection</h2>
+    <p>Isolation Forest powered anomaly detection for IoT sensor streams</p>
+</div>
+
+<!-- AI Stats -->
+<div class="stats-row">
+    <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="aiNormal">--</div>
+        <div class="stat-label">Normal Readings</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-value" id="aiAnomaly">--</div>
+        <div class="stat-label">Anomalies Detected</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value" id="aiAccuracy">--</div>
+        <div class="stat-label">Avg Confidence</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">🧠</div>
+        <div class="stat-value">IF</div>
+        <div class="stat-label">Algorithm: Isolation Forest</div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="grid-2">
+    <div class="glass-card">
+        <div class="card-header">
+            <h3><i data-lucide="activity" style="width:18px;height:18px;"></i> Detection Timeline</h3>
+            <button class="btn btn-glow btn-sm" onclick="runBatchPrediction()">
+                <i data-lucide="scan" style="width:14px;height:14px;"></i> Run Analysis
+            </button>
+        </div>
+        <div class="chart-container">
+            <canvas id="detectionChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-card">
+        <div class="card-header">
+            <h3><i data-lucide="target" style="width:18px;height:18px;"></i> Risk Distribution</h3>
+        </div>
+        <div class="chart-container">
+            <canvas id="riskChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Test -->
+<div class="glass-card mb-4">
+    <div class="card-header">
+        <h3><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Manual Sensor Test</h3>
+    </div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+        <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Temperature (°C)</label>
+            <input type="number" id="testTemp" value="25" step="0.1"
+                   style="background:rgba(0,0,0,0.3); border:1px solid var(--border-glass); border-radius:8px; padding:8px 14px; color:var(--text-primary); font-family:inherit; width:130px;">
+        </div>
+        <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Humidity (%)</label>
+            <input type="number" id="testHumid" value="60" step="0.1"
+                   style="background:rgba(0,0,0,0.3); border:1px solid var(--border-glass); border-radius:8px; padding:8px 14px; color:var(--text-primary); font-family:inherit; width:130px;">
+        </div>
+        <div>
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Pressure (hPa)</label>
+            <input type="number" id="testPressure" value="1013" step="0.1"
+                   style="background:rgba(0,0,0,0.3); border:1px solid var(--border-glass); border-radius:8px; padding:8px 14px; color:var(--text-primary); font-family:inherit; width:130px;">
+        </div>
+        <button class="btn btn-primary" onclick="testManual()">
+            <i data-lucide="play" style="width:14px;height:14px;"></i> Test
+        </button>
+    </div>
+    <div id="manualResult" class="mt-4" style="display:none;"></div>
+</div>
+
+<!-- AI Results Grid -->
+<div class="section-title">
+    <span class="icon">📋</span>
+    Batch Detection Results
+</div>
+
+<div class="ai-result-grid" id="aiResultGrid">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Running AI predictions...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let detectionChart, riskChart;
+
+function initCharts() {
+    const ctxDetection = document.getElementById('detectionChart').getContext('2d');
+    detectionChart = new Chart(ctxDetection, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Confidence Score',
+                    data: [],
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: [],
+                    pointBorderColor: [],
+                    pointRadius: 6,
+                    pointHoverRadius: 9
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } }
+            },
+            scales: {
+                x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 0, max: 100 }
+            },
+            animation: { duration: 1200, easing: 'easeOutQuart' }
+        }
+    });
+
+    const ctxRisk = document.getElementById('riskChart').getContext('2d');
+    riskChart = new Chart(ctxRisk, {
+        type: 'polarArea',
+        data: {
+            labels: ['Low', 'Medium', 'High', 'Critical'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.6)',
+                    'rgba(245, 158, 11, 0.6)',
+                    'rgba(239, 68, 68, 0.6)',
+                    'rgba(139, 92, 246, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(139, 92, 246, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 16, font: { family: 'Inter' } } }
+            },
+            animation: { duration: 1000 }
+        }
+    });
+}
+
+async function runBatchPrediction() {
+    try {
+        const res = await fetch('/api/ai-batch-predict');
+        const data = await res.json();
+        const predictions = data.predictions;
+
+        // Update stats
+        const normal = predictions.filter(p => !p.is_anomaly).length;
+        const anomaly = predictions.filter(p => p.is_anomaly).length;
+        const avgConf = (predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length).toFixed(1);
+
+        document.getElementById('aiNormal').textContent = normal;
+        document.getElementById('aiAnomaly').textContent = anomaly;
+        document.getElementById('aiAccuracy').textContent = avgConf + '%';
+
+        // Update detection chart
+        detectionChart.data.labels = predictions.map((_, i) => `Sensor ${i + 1}`);
+        detectionChart.data.datasets[0].data = predictions.map(p => p.confidence);
+        detectionChart.data.datasets[0].pointBackgroundColor = predictions.map(p =>
+            p.is_anomaly ? 'rgba(239, 68, 68, 1)' : 'rgba(16, 185, 129, 1)');
+        detectionChart.data.datasets[0].pointBorderColor = predictions.map(p =>
+            p.is_anomaly ? 'rgba(239, 68, 68, 1)' : 'rgba(16, 185, 129, 1)');
+        detectionChart.update('active');
+
+        // Update risk chart
+        const riskCounts = { Low: 0, Medium: 0, High: 0, Critical: 0 };
+        predictions.forEach(p => riskCounts[p.risk_level]++);
+        riskChart.data.datasets[0].data = [riskCounts.Low, riskCounts.Medium, riskCounts.High, riskCounts.Critical];
+        riskChart.update('active');
+
+        // Render result cards
+        renderAiResults(predictions);
+
+    } catch (err) {
+        console.error('Batch prediction failed:', err);
+    }
+}
+
+async function testManual() {
+    const temp = parseFloat(document.getElementById('testTemp').value);
+    const humid = parseFloat(document.getElementById('testHumid').value);
+    const pressure = parseFloat(document.getElementById('testPressure').value);
+
+    try {
+        const res = await fetch('/api/ai-predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ temperature: temp, humidity: humid, pressure: pressure })
+        });
+        const result = await res.json();
+
+        const resultDiv = document.getElementById('manualResult');
+        resultDiv.style.display = 'block';
+        const isAnomaly = result.is_anomaly;
+
+        resultDiv.innerHTML = `
+            <div class="ai-result-card ${isAnomaly ? 'anomaly-result' : 'normal-result'}" style="margin-top:12px;">
+                <div class="result-header">
+                    <span style="font-weight:600;">Manual Test Result</span>
+                    <span class="badge ${isAnomaly ? 'anomaly' : 'normal'}">${result.prediction}</span>
+                </div>
+                <div class="sensor-readings">
+                    <div class="reading-row">
+                        <span class="label">🌡️ Temperature</span>
+                        <span class="value">${result.temperature}°C</span>
+                    </div>
+                    <div class="reading-row">
+                        <span class="label">💧 Humidity</span>
+                        <span class="value">${result.humidity}%</span>
+                    </div>
+                    <div class="reading-row">
+                        <span class="label">🔵 Pressure</span>
+                        <span class="value">${result.pressure} hPa</span>
+                    </div>
+                    <div class="reading-row">
+                        <span class="label">📊 Confidence</span>
+                        <span class="value">${result.confidence}%</span>
+                    </div>
+                    <div class="reading-row">
+                        <span class="label">⚡ Risk Level</span>
+                        <span class="value ${result.risk_level === 'Critical' ? 'text-red' : result.risk_level === 'High' ? 'text-orange' : 'text-green'}">${result.risk_level}</span>
+                    </div>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width:${result.confidence}%"></div>
+                </div>
+            </div>`;
+    } catch (err) {
+        console.error('Manual test failed:', err);
+    }
+}
+
+function renderAiResults(predictions) {
+    const grid = document.getElementById('aiResultGrid');
+    grid.innerHTML = predictions.map((pred, i) => {
+        const isAnomaly = pred.is_anomaly;
+        return `
+        <div class="ai-result-card ${isAnomaly ? 'anomaly-result' : 'normal-result'}">
+            <div class="result-header">
+                <span style="font-weight:600;">Sensor ${i + 1}</span>
+                <span class="badge ${isAnomaly ? 'anomaly' : 'normal'}">${pred.prediction}</span>
+            </div>
+            <div class="sensor-readings">
+                <div class="reading-row">
+                    <span class="label">🌡️ Temp</span>
+                    <span class="value ${pred.temperature > 40 ? 'text-red' : ''}">${pred.temperature}°C</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">💧 Humidity</span>
+                    <span class="value">${pred.humidity}%</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">🔵 Pressure</span>
+                    <span class="value">${pred.pressure} hPa</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">⚡ Risk</span>
+                    <span class="value ${pred.risk_level === 'Critical' ? 'text-red' : pred.risk_level === 'High' ? 'text-orange' : 'text-green'}">${pred.risk_level}</span>
+                </div>
+            </div>
+            <div class="confidence-bar">
+                <div class="confidence-fill" style="width:${pred.confidence}%"></div>
+            </div>
+            <div class="mt-2 text-muted" style="font-size:0.75rem;">Confidence: ${pred.confidence}%</div>
+        </div>`;
+    }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    runBatchPrediction();
+});
+</script>
+{% endblock %}

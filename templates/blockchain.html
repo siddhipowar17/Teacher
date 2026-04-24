@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Blockchain - AI Blockchain IoT{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>⛓️ Blockchain Explorer</h2>
+    <p>SHA-256 lightweight blockchain for immutable IoT data storage</p>
+</div>
+
+<!-- Blockchain Stats -->
+<div class="stats-row">
+    <div class="stat-card blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value" id="bcBlocks">--</div>
+        <div class="stat-label">Total Blocks</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="bcValid">--</div>
+        <div class="stat-label">Chain Integrity</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">🔐</div>
+        <div class="stat-value">SHA-256</div>
+        <div class="stat-label">Hash Algorithm</div>
+    </div>
+    <div class="stat-card cyan">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-value">Edge</div>
+        <div class="stat-label">Data Source</div>
+    </div>
+</div>
+
+<!-- Add Block -->
+<div class="glass-card mb-4">
+    <div class="card-header">
+        <h3><i data-lucide="plus-circle" style="width:18px;height:18px;"></i> Add New Block</h3>
+    </div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+        <div style="flex:1; min-width:200px;">
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Block Data (JSON or text)</label>
+            <input type="text" id="blockData" value='{"sensor": "IOT-SENSOR-001", "temp": 25.5, "status": "normal"}'
+                   style="background:rgba(0,0,0,0.3); border:1px solid var(--border-glass); border-radius:8px; padding:8px 14px; color:var(--text-primary); font-family:'JetBrains Mono',monospace; font-size:0.82rem; width:100%;">
+        </div>
+        <button class="btn btn-primary" onclick="addBlock()">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> Mine Block
+        </button>
+        <button class="btn btn-glow" onclick="addPipelineBlock()">
+            <i data-lucide="workflow" style="width:14px;height:14px;"></i> Add Pipeline Block
+        </button>
+    </div>
+</div>
+
+<!-- Chain Visualization -->
+<div class="section-title">
+    <span class="icon">🔗</span>
+    Chain Visualization
+</div>
+
+<div class="glass-card">
+    <div class="blockchain-chain" id="blockchainChain">
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-text">Loading blockchain...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Block Details Table -->
+<div class="section-title mt-4">
+    <span class="icon">📋</span>
+    Block Details
+</div>
+
+<div class="glass-card">
+    <div style="overflow-x:auto;">
+        <table class="data-table" id="blockTable">
+            <thead>
+                <tr>
+                    <th>Index</th>
+                    <th>Timestamp</th>
+                    <th>Data</th>
+                    <th>Hash</th>
+                    <th>Previous Hash</th>
+                </tr>
+            </thead>
+            <tbody id="blockTableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadBlockchain() {
+    try {
+        const res = await fetch('/api/blockchain/chain');
+        const data = await res.json();
+
+        document.getElementById('bcBlocks').textContent = data.length;
+        document.getElementById('bcValid').textContent = data.is_valid ? 'Valid' : 'Invalid';
+
+        renderChain(data.chain);
+        renderTable(data.chain);
+    } catch (err) {
+        console.error('Failed to load blockchain:', err);
+    }
+}
+
+function renderChain(chain) {
+    const container = document.getElementById('blockchainChain');
+    container.innerHTML = chain.map((block, i) => {
+        const isGenesis = block.index === 0;
+        const dataStr = typeof block.data === 'object' ? JSON.stringify(block.data) : block.data;
+        const shortData = dataStr.length > 50 ? dataStr.substring(0, 50) + '...' : dataStr;
+
+        return `
+            ${i > 0 ? '<div class="chain-connector">→</div>' : ''}
+            <div class="block-wrapper">
+                <div class="block-card ${isGenesis ? 'genesis' : ''}">
+                    <div class="block-index">${isGenesis ? '🌟 Genesis' : 'Block #' + block.index}</div>
+                    <div class="block-field" style="margin-top:12px;">
+                        <div class="field-label">Timestamp</div>
+                        <div class="field-value">${block.timestamp}</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Data</div>
+                        <div class="field-value" title="${dataStr}">${shortData}</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Hash</div>
+                        <div class="field-value hash">${block.hash}</div>
+                    </div>
+                    <div class="block-field">
+                        <div class="field-label">Previous Hash</div>
+                        <div class="field-value hash">${block.previous_hash === '0' ? '0 (Genesis)' : block.previous_hash}</div>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function renderTable(chain) {
+    const tbody = document.getElementById('blockTableBody');
+    tbody.innerHTML = chain.map(block => {
+        const dataStr = typeof block.data === 'object' ? JSON.stringify(block.data) : block.data;
+        const shortData = dataStr.length > 60 ? dataStr.substring(0, 60) + '...' : dataStr;
+        return `
+            <tr>
+                <td><span class="badge info">#${block.index}</span></td>
+                <td style="font-size:0.8rem;">${block.timestamp}</td>
+                <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;" title="${dataStr}">${shortData}</td>
+                <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--accent-cyan);">${truncHash(block.hash)}</td>
+                <td style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-muted);">${block.previous_hash === '0' ? 'Genesis' : truncHash(block.previous_hash)}</td>
+            </tr>`;
+    }).join('');
+}
+
+async function addBlock() {
+    const input = document.getElementById('blockData').value;
+    let data;
+    try {
+        data = JSON.parse(input);
+    } catch {
+        data = { message: input };
+    }
+
+    try {
+        const res = await fetch('/api/blockchain/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        await res.json();
+        loadBlockchain();
+    } catch (err) {
+        console.error('Failed to add block:', err);
+    }
+}
+
+async function addPipelineBlock() {
+    try {
+        const res = await fetch('/api/pipeline');
+        await res.json();
+        loadBlockchain();
+    } catch (err) {
+        console.error('Pipeline failed:', err);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadBlockchain);
+</script>
+{% endblock %}

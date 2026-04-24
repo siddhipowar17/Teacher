@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% block title %}Device Auth - AI Blockchain IoT{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>🔒 Zero-Trust Device Authentication</h2>
+    <p>Continuous verification of IoT devices under zero-trust security policy</p>
+</div>
+
+<!-- Device Stats -->
+<div class="stats-row">
+    <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="devTrusted">--</div>
+        <div class="stat-label">Trusted Devices</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-icon">🚫</div>
+        <div class="stat-value" id="devBlocked">--</div>
+        <div class="stat-label">Blocked Devices</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-icon">🔍</div>
+        <div class="stat-value" id="devTotal">--</div>
+        <div class="stat-label">Total Known</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">🛡️</div>
+        <div class="stat-value">ZTA</div>
+        <div class="stat-label">Zero Trust Active</div>
+    </div>
+</div>
+
+<!-- Verify Device -->
+<div class="glass-card mb-4">
+    <div class="card-header">
+        <h3><i data-lucide="search" style="width:18px;height:18px;"></i> Verify Device</h3>
+    </div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:end;">
+        <div style="flex:1; min-width:200px;">
+            <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">Device ID</label>
+            <input type="text" id="verifyDeviceId" value="IOT-SENSOR-001" placeholder="Enter device ID"
+                   style="background:rgba(0,0,0,0.3); border:1px solid var(--border-glass); border-radius:8px; padding:8px 14px; color:var(--text-primary); font-family:'JetBrains Mono',monospace; font-size:0.85rem; width:100%;">
+        </div>
+        <button class="btn btn-primary" onclick="verifyDevice()">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i> Verify
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="verifyRogue()">
+            <i data-lucide="shield-alert" style="width:14px;height:14px;"></i> Test Rogue Device
+        </button>
+    </div>
+    <div id="verifyResult" class="mt-4" style="display:none;"></div>
+</div>
+
+<!-- Trusted Devices -->
+<div class="section-title">
+    <span class="icon">✅</span>
+    Trusted Devices
+</div>
+<div class="device-grid mb-4" id="trustedGrid">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading devices...</div>
+    </div>
+</div>
+
+<!-- Blocked Devices -->
+<div class="section-title">
+    <span class="icon">🚫</span>
+    Blocked Devices
+</div>
+<div class="device-grid mb-4" id="blockedGrid"></div>
+
+<!-- Auth Log -->
+<div class="section-title mt-4">
+    <span class="icon">📋</span>
+    Authentication Log
+</div>
+<div class="glass-card">
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Device ID</th>
+                    <th>Action</th>
+                    <th>Detail</th>
+                </tr>
+            </thead>
+            <tbody id="authLogBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDevices() {
+    try {
+        const [devRes, logRes] = await Promise.all([
+            fetch('/api/devices'),
+            fetch('/api/devices/auth-log')
+        ]);
+        const devData = await devRes.json();
+        const logData = await logRes.json();
+
+        document.getElementById('devTrusted').textContent = devData.total_trusted;
+        document.getElementById('devBlocked').textContent = devData.total_blocked;
+        document.getElementById('devTotal').textContent = devData.total_trusted + devData.total_blocked;
+
+        renderTrusted(devData.trusted);
+        renderBlocked(devData.blocked);
+        renderAuthLog(logData.log);
+    } catch (err) {
+        console.error('Failed to load devices:', err);
+    }
+}
+
+function renderTrusted(devices) {
+    const grid = document.getElementById('trustedGrid');
+    grid.innerHTML = devices.map((dev, i) => `
+        <div class="device-card trusted-device" style="animation-delay:${i * 0.08}s">
+            <div class="device-header">
+                <div>
+                    <div class="device-name">${dev.name}</div>
+                    <div class="device-id">${dev.id}</div>
+                </div>
+                <div class="device-icon">📡</div>
+            </div>
+            <span class="badge trusted">✅ Trusted</span>
+            <div class="device-details">
+                <div class="detail-row">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">${dev.type}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Location</span>
+                    <span class="detail-value">${dev.location}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Trust Score</span>
+                    <span class="detail-value text-green">${dev.trust_score}%</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Last Verified</span>
+                    <span class="detail-value" style="font-size:0.72rem;">${dev.last_verified}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Token</span>
+                    <span class="detail-value" style="font-size:0.68rem;">${dev.token.substring(0, 12)}...</span>
+                </div>
+            </div>
+            <div class="trust-score-bar mt-2">
+                <div class="trust-score-fill" style="width:${dev.trust_score}%"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderBlocked(devices) {
+    const grid = document.getElementById('blockedGrid');
+    grid.innerHTML = devices.map((dev, i) => `
+        <div class="device-card blocked-device" style="animation-delay:${i * 0.08}s">
+            <div class="device-header">
+                <div>
+                    <div class="device-name">${dev.name}</div>
+                    <div class="device-id">${dev.id}</div>
+                </div>
+                <div class="device-icon">🚫</div>
+            </div>
+            <span class="badge blocked">🚫 Blocked</span>
+            <div class="device-details">
+                <div class="detail-row">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">${dev.type}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Location</span>
+                    <span class="detail-value">${dev.location}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Reason</span>
+                    <span class="detail-value text-red">${dev.reason}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Threat Level</span>
+                    <span class="detail-value text-red">${dev.threat_level}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Blocked At</span>
+                    <span class="detail-value" style="font-size:0.72rem;">${dev.blocked_at}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderAuthLog(log) {
+    const tbody = document.getElementById('authLogBody');
+    tbody.innerHTML = log.map(entry => {
+        let actionClass = 'info';
+        if (entry.action === 'DENIED' || entry.action === 'BLOCKED') actionClass = 'blocked';
+        if (entry.action === 'GRANTED') actionClass = 'trusted';
+
+        return `
+        <tr>
+            <td style="font-size:0.8rem;">${entry.timestamp}</td>
+            <td><span class="mono" style="font-size:0.78rem;">${entry.device_id}</span></td>
+            <td><span class="badge ${actionClass}">${entry.action}</span></td>
+            <td style="font-size:0.82rem;">${entry.detail}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function verifyDevice() {
+    const deviceId = document.getElementById('verifyDeviceId').value.trim();
+    if (!deviceId) return;
+
+    try {
+        const res = await fetch('/api/devices/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ device_id: deviceId })
+        });
+        const result = await res.json();
+        showVerifyResult(result);
+
+        // Refresh log
+        const logRes = await fetch('/api/devices/auth-log');
+        const logData = await logRes.json();
+        renderAuthLog(logData.log);
+    } catch (err) {
+        console.error('Verification failed:', err);
+    }
+}
+
+function verifyRogue() {
+    document.getElementById('verifyDeviceId').value = 'IOT-ROGUE-101';
+    verifyDevice();
+}
+
+function showVerifyResult(result) {
+    const div = document.getElementById('verifyResult');
+    div.style.display = 'block';
+    const authenticated = result.authenticated;
+
+    div.innerHTML = `
+        <div class="device-card ${authenticated ? 'trusted-device' : 'blocked-device'}" style="margin-top:8px;">
+            <div class="device-header">
+                <div>
+                    <div class="device-name">${result.device ? result.device.name : 'Unknown Device'}</div>
+                    <div class="device-id">${result.device ? result.device.id : 'N/A'}</div>
+                </div>
+                <span class="badge ${authenticated ? 'trusted' : 'blocked'}">${result.status}</span>
+            </div>
+            <div class="mt-2">
+                <p style="font-size:0.85rem; color:${authenticated ? 'var(--accent-green)' : 'var(--accent-red)'};">
+                    ${authenticated ? '✅ Device authenticated successfully under zero-trust policy.' : '🚫 Device authentication DENIED. Access blocked.'}
+                </p>
+            </div>
+        </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', loadDevices);
+</script>
+{% endblock %}
