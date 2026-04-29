@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Blockchain IoT Framework{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons (CDN) -->
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- ─── Sidebar ──────────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="shield-icon">🛡️</div>
+            <div class="brand-text">
+                <span>AI Blockchain IoT</span>
+                <span>Secure Framework v1.0</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section-title">Main Navigation</div>
+            <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                <span class="icon"><i data-lucide="layout-dashboard"></i></span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/ai-analysis" class="nav-link {% if active_page == 'ai' %}active{% endif %}">
+                <span class="icon"><i data-lucide="brain"></i></span>
+                <span>AI Analysis</span>
+            </a>
+            <a href="/blockchain" class="nav-link {% if active_page == 'blockchain' %}active{% endif %}">
+                <span class="icon"><i data-lucide="blocks"></i></span>
+                <span>Blockchain</span>
+            </a>
+            <a href="/devices" class="nav-link {% if active_page == 'devices' %}active{% endif %}">
+                <span class="icon"><i data-lucide="shield-check"></i></span>
+                <span>Device Auth</span>
+            </a>
+
+            <div class="nav-section-title">System</div>
+            <a href="#" class="nav-link" onclick="runPipeline(); return false;">
+                <span class="icon"><i data-lucide="workflow"></i></span>
+                <span>Run Pipeline</span>
+            </a>
+            <a href="#" class="nav-link" onclick="location.reload(); return false;">
+                <span class="icon"><i data-lucide="refresh-cw"></i></span>
+                <span>Refresh Data</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-info">
+                <div>🔒 Zero-Trust: Active</div>
+                <div>⛓️ Blockchain: Synced</div>
+                <div>🤖 AI Engine: Online</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ─── Navbar ───────────────────────────────────────────── -->
+    <nav class="navbar">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+        <a href="/" class="navbar-brand">
+            <div class="logo-icon">⛓️</div>
+            <h1>SecureIoT Framework</h1>
+        </a>
+        <div class="navbar-status">
+            <div class="status-badge">
+                <span class="dot green"></span>
+                <span>System Online</span>
+            </div>
+            <div class="status-badge">
+                <span class="dot blue"></span>
+                <span>Edge Nodes Active</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ─── Main Content ─────────────────────────────────────── -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ─── Base Scripts ─────────────────────────────────────── -->
+    <script>
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+
+        // Sidebar toggle for mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            const sidebar = document.getElementById('sidebar');
+            const toggle = document.querySelector('.menu-toggle');
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Run full pipeline
+        async function runPipeline() {
+            try {
+                const res = await fetch('/api/pipeline');
+                const data = await res.json();
+                alert(`Pipeline Complete!\n\nSensors: ${data.sensor_data.length}\nAnomalies: ${data.ai_predictions.filter(p => p.is_anomaly).length}\nNew Block: #${data.blockchain_entry.index}`);
+                location.reload();
+            } catch (err) {
+                alert('Pipeline execution failed. Check console for details.');
+                console.error(err);
+            }
+        }
+
+        // Utility: Format hash for display
+        function truncHash(hash) {
+            if (!hash || hash.length < 16) return hash;
+            return hash.substring(0, 8) + '...' + hash.substring(hash.length - 8);
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - AI Blockchain IoT{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>📊 IoT Sensor Dashboard</h2>
+    <p>Real-time IoT sensor monitoring with edge-processed data streams</p>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row" id="statsRow">
+    <div class="stat-card blue">
+        <div class="stat-icon">📡</div>
+        <div class="stat-value" id="statSensors">--</div>
+        <div class="stat-label">Active Sensors</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="statNormal">--</div>
+        <div class="stat-label">Normal Readings</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" id="statAnomalies">--</div>
+        <div class="stat-label">Anomalies Detected</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon">⛓️</div>
+        <div class="stat-value" id="statBlocks">--</div>
+        <div class="stat-label">Blockchain Blocks</div>
+    </div>
+    <div class="stat-card cyan">
+        <div class="stat-icon">🖥️</div>
+        <div class="stat-value" id="statEdge">--</div>
+        <div class="stat-label">Edge Processed</div>
+    </div>
+    <div class="stat-card orange">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-value" id="statDevices">--</div>
+        <div class="stat-label">Trusted Devices</div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid-2">
+    <div class="glass-card">
+        <div class="card-header">
+            <h3><i data-lucide="thermometer" style="width:18px;height:18px;"></i> Sensor Readings</h3>
+            <button class="btn btn-outline btn-sm" onclick="refreshDashboard()">
+                <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh
+            </button>
+        </div>
+        <div class="chart-container">
+            <canvas id="sensorChart"></canvas>
+        </div>
+    </div>
+    <div class="glass-card">
+        <div class="card-header">
+            <h3><i data-lucide="pie-chart" style="width:18px;height:18px;"></i> AI Detection Overview</h3>
+        </div>
+        <div class="chart-container">
+            <canvas id="aiChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Live Sensor Cards -->
+<div class="section-title">
+    <span class="icon">📡</span>
+    Live Sensor Data
+    <span class="edge-badge">Edge Processed</span>
+</div>
+
+<div class="sensor-grid" id="sensorGrid">
+    <div class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading sensor data...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let sensorChart, aiChart;
+
+// Initialize charts with Chart.js
+function initCharts() {
+    const ctxSensor = document.getElementById('sensorChart').getContext('2d');
+    sensorChart = new Chart(ctxSensor, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: [],
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                },
+                {
+                    label: 'Humidity (%)',
+                    data: [],
+                    backgroundColor: 'rgba(6, 182, 212, 0.6)',
+                    borderColor: 'rgba(6, 182, 212, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                },
+                {
+                    label: 'Pressure (hPa)',
+                    data: [],
+                    backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                    borderColor: 'rgba(139, 92, 246, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } }
+            },
+            scales: {
+                x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            },
+            animation: { duration: 1000, easing: 'easeOutQuart' }
+        }
+    });
+
+    const ctxAi = document.getElementById('aiChart').getContext('2d');
+    aiChart = new Chart(ctxAi, {
+        type: 'doughnut',
+        data: {
+            labels: ['Normal', 'Anomaly'],
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                borderColor: ['rgba(16, 185, 129, 1)', 'rgba(239, 68, 68, 1)'],
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#94a3b8', padding: 20, font: { family: 'Inter', size: 13 } } }
+            },
+            animation: { animateRotate: true, duration: 1200 }
+        }
+    });
+}
+
+// Fetch and display sensor data
+async function refreshDashboard() {
+    try {
+        // Fetch sensor data and AI predictions in parallel
+        const [sensorRes, aiRes, chainRes, deviceRes] = await Promise.all([
+            fetch('/api/sensor-data'),
+            fetch('/api/ai-batch-predict'),
+            fetch('/api/blockchain/chain'),
+            fetch('/api/devices')
+        ]);
+
+        const sensorData = await sensorRes.json();
+        const aiData = await aiRes.json();
+        const chainData = await chainRes.json();
+        const deviceData = await deviceRes.json();
+
+        // Update stats
+        document.getElementById('statSensors').textContent = sensorData.data.length;
+        const normalCount = aiData.predictions.filter(p => !p.is_anomaly).length;
+        const anomalyCount = aiData.predictions.filter(p => p.is_anomaly).length;
+        document.getElementById('statNormal').textContent = normalCount;
+        document.getElementById('statAnomalies').textContent = anomalyCount;
+        document.getElementById('statBlocks').textContent = chainData.length;
+        document.getElementById('statEdge').textContent = sensorData.edge_stats.total_processed;
+        document.getElementById('statDevices').textContent = deviceData.total_trusted;
+
+        // Update sensor chart
+        const labels = sensorData.data.map(d => d.sensor_id.replace('IOT-SENSOR-', 'S'));
+        sensorChart.data.labels = labels;
+        sensorChart.data.datasets[0].data = sensorData.data.map(d => d.temperature);
+        sensorChart.data.datasets[1].data = sensorData.data.map(d => d.humidity);
+        sensorChart.data.datasets[2].data = sensorData.data.map(d => d.pressure / 10);
+        sensorChart.update('active');
+
+        // Update AI chart
+        aiChart.data.datasets[0].data = [normalCount, anomalyCount];
+        aiChart.update('active');
+
+        // Render sensor cards
+        renderSensorCards(sensorData.data, aiData.predictions);
+
+    } catch (err) {
+        console.error('Dashboard refresh failed:', err);
+    }
+}
+
+function renderSensorCards(sensors, predictions) {
+    const grid = document.getElementById('sensorGrid');
+    grid.innerHTML = sensors.map((sensor, i) => {
+        const pred = predictions[i] || {};
+        const isAnomaly = pred.is_anomaly;
+        const badgeClass = isAnomaly ? 'anomaly' : 'normal';
+        const badgeText = isAnomaly ? 'Anomaly' : 'Normal';
+
+        return `
+        <div class="sensor-card">
+            <div class="sensor-header">
+                <div>
+                    <div class="sensor-name">${sensor.sensor_name}</div>
+                    <div class="sensor-id">${sensor.sensor_id}</div>
+                </div>
+                <span class="badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="sensor-readings">
+                <div class="reading-row">
+                    <span class="label">🌡️ Temperature</span>
+                    <span class="value ${sensor.temperature > 40 ? 'text-red' : 'text-cyan'}">${sensor.temperature}°C</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">💧 Humidity</span>
+                    <span class="value text-blue">${sensor.humidity}%</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">🔵 Pressure</span>
+                    <span class="value text-purple">${sensor.pressure} hPa</span>
+                </div>
+                <div class="reading-row">
+                    <span class="label">📍 Edge Node</span>
+                    <span class="value">${sensor.edge_node}</span>
+                </div>
+            </div>
+            <div style="margin-top:10px;">
+                <span class="edge-badge">⚡ Edge Latency: ${sensor.edge_latency_ms}ms</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    if (window.lucide) lucide.createIcons();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    refreshDashboard();
+});
+</script>
+{% endblock %}
