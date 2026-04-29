@@ -38,8 +38,8 @@ class AnomalyDetector:
         prediction = self.model.predict(features)[0]
         score = self.model.decision_function(features)[0]
 
-        is_anomaly = prediction == -1
-        confidence = min(abs(score) * 100, 100)
+        is_anomaly = bool(prediction == -1)
+        confidence = float(min(abs(score) * 100, 100))
 
         return {
             "temperature": round(temperature, 2),
