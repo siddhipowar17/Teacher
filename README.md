@@ -1,140 +1,165 @@
-# AI-Based Lightweight Blockchain Framework with Edge Computing and Zero-Trust Security for Secure IoT Communication
+# LuxeRent - Premium Rental Marketplace
 
-A visually stunning, fully functional web application demonstrating the integration of **AI anomaly detection**, **lightweight blockchain**, **edge computing**, and **zero-trust security** for secure IoT communication.
+A futuristic luxury rental marketplace website built with PHP, MySQL, HTML5, CSS3, Bootstrap 5, JavaScript, GSAP animations, and modern UI design principles.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-![Flask](https://img.shields.io/badge/Flask-3.x-green?logo=flask)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-1.6-orange?logo=scikitlearn)
+![LuxeRent](https://img.shields.io/badge/LuxeRent-Premium%20Rentals-667eea?style=for-the-badge)
 
 ## Features
 
-### 1. AI Anomaly Detection
-- **Isolation Forest** algorithm from scikit-learn
-- Real-time anomaly detection on IoT sensor data
-- Color-coded results: Green (Normal) / Red (Anomaly)
-- Confidence scores and risk level assessment
-- Manual sensor value testing interface
+### Frontend
+- **Cinematic Hero Section** with fullscreen autoplay video background
+- **Glassmorphism Navigation** with transparent glass effect and smooth scroll transitions
+- **GSAP Animations** - fade-up, parallax, stagger, scroll-triggered animations
+- **AOS (Animate on Scroll)** for section reveal animations
+- **Swiper.js** testimonial carousel with auto-play
+- **Dark Mode** toggle with localStorage persistence
+- **Live Search** with AJAX-powered instant results
+- **Animated Counters** with intersection observer
+- **Cursor Glow Effect** following mouse movement
+- **Floating Cards & Hover Effects** - lift, glow, scale animations
+- **Responsive Design** - fully mobile-optimized
+- **Loading Screen** with progress bar animation
+- **Back to Top** button with smooth scroll
+- **Infinite Scroll** on products page
 
-### 2. Lightweight Blockchain
-- SHA-256 hash-based blockchain implementation
-- Genesis block initialization
-- Chain integrity verification
-- Visual chain-style block display with hash details
-- Block explorer with detailed table view
+### Backend
+- **User Authentication** - registration, login, logout with password hashing
+- **Product Management** - CRUD operations, categories, filters, sorting
+- **Booking System** - date picker, price calculator, booking management
+- **Wishlist** - AJAX-powered add/remove with heart toggle
+- **Recently Viewed** - tracking and display
+- **Notifications** - system notifications for bookings
+- **Contact Form** - message storage and admin viewing
+- **Admin Dashboard** - full management panel with analytics
 
-### 3. Zero-Trust Security
-- Device authentication and verification
-- Trusted vs Blocked device management
-- Trust score tracking per device
-- Authentication event logging
-- Visual device status panels (green = trusted, red = blocked)
+### Admin Panel
+- **Dashboard** with stats cards and revenue chart
+- **Products Management** - view, delete products
+- **Bookings Management** - view, update status
+- **User Management** - view, change roles
+- **Messages** - view contact form submissions
+- **Analytics** - Revenue trends, booking status, category distribution charts
+- **Chart.js** powered visualizations
 
-### 4. Edge Computing Simulation
-- Local data preprocessing before blockchain storage
-- Data validation, range checking, and compression
-- Processing latency tracking
-- Edge node assignment simulation
+## Tech Stack
 
-### 5. Modern Dark-Themed UI
-- **Glassmorphism** design with backdrop blur
-- Dark theme (black + blue gradient)
-- Animated charts with **Chart.js**
-- Glowing buttons, hover effects, smooth transitions
-- Responsive layout (mobile + desktop)
-- Card-based data display
-- Loading animations and status indicators
+| Technology | Purpose |
+|---|---|
+| PHP | Backend logic & API |
+| MySQL | Database (XAMPP) |
+| HTML5 | Page structure |
+| CSS3 | Styling & animations |
+| Bootstrap 5 | Responsive grid & components |
+| JavaScript / jQuery | Interactivity |
+| GSAP | Premium animations |
+| AOS | Scroll animations |
+| Swiper.js | Carousels |
+| Chart.js | Admin analytics |
+| Font Awesome | Icons |
 
-## Integration Flow
-
-```
-IoT Sensor Data → Edge Processing → AI Detection → Device Verification → Blockchain Storage → UI Display
-```
-
-## Project Structure
-
-```
-ai-blockchain-iot/
-├── app.py                    # Flask application (routes + APIs)
-├── requirements.txt          # Python dependencies
-├── modules/
-│   ├── __init__.py
-│   ├── ai_detector.py        # Isolation Forest anomaly detection
-│   ├── blockchain.py         # SHA-256 lightweight blockchain
-│   ├── edge_computing.py     # Edge computing simulation
-│   └── zero_trust.py         # Zero-trust device authentication
-├── templates/
-│   ├── base.html             # Base template with navbar + sidebar
-│   ├── dashboard.html        # IoT sensor dashboard
-│   ├── ai_analysis.html      # AI anomaly detection page
-│   ├── blockchain.html       # Blockchain explorer page
-│   └── devices.html          # Device authentication page
-└── static/
-    └── css/
-        └── style.css         # Full stylesheet (glassmorphism + dark theme)
-```
-
-## Setup & Installation
+## Installation
 
 ### Prerequisites
-- Python 3.10 or higher
-- pip package manager
+- XAMPP (Apache + MySQL + PHP)
+- Web browser
 
-### Install & Run
+### Setup
 
-```bash
-# Clone the repository
-git clone <repo-url>
-cd ai-blockchain-iot
+1. **Clone or copy** this project into your XAMPP `htdocs` folder:
+   ```
+   C:\xampp\htdocs\premium-rental-website
+   ```
 
-# Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
+2. **Start XAMPP** - Start Apache and MySQL services
 
-# Install dependencies
-pip install -r requirements.txt
+3. **Create Database** - Open phpMyAdmin (`http://localhost/phpmyadmin`) and:
+   - Import `database/schema.sql`
+   - Or run the SQL file manually
 
-# Run the application
-python app.py
+4. **Configure Database** - Edit `includes/db.php` if your MySQL credentials differ:
+   ```php
+   define('DB_HOST', 'localhost');
+   define('DB_USER', 'root');
+   define('DB_PASS', '');
+   define('DB_NAME', 'premium_rental');
+   ```
+
+5. **Access the website**:
+   ```
+   http://localhost/premium-rental-website
+   ```
+
+### Default Admin Login
+- **Email:** admin@rental.com
+- **Password:** password
+
+## Folder Structure
+
 ```
-
-The application will be available at **http://localhost:5000**
+premium-rental-website/
+├── assets/
+│   ├── css/
+│   │   ├── style.css          # Main styles
+│   │   └── animations.css     # Animation styles
+│   ├── js/
+│   │   ├── main.js            # Core JavaScript
+│   │   └── animations.js      # GSAP animations
+│   ├── images/
+│   ├── videos/
+│   └── uploads/
+├── admin/
+├── includes/
+│   ├── ajax/
+│   │   ├── search.php         # Live search endpoint
+│   │   ├── wishlist.php       # Wishlist toggle
+│   │   └── load-products.php  # Infinite scroll
+│   ├── db.php                 # Database connection
+│   ├── auth.php               # Authentication functions
+│   ├── header.php             # Site header
+│   └── footer.php             # Site footer
+├── database/
+│   └── schema.sql             # Database schema + seed data
+├── index.php                  # Homepage
+├── login.php                  # Sign in page
+├── register.php               # Registration page
+├── products.php               # Products listing
+├── product-details.php        # Single product view
+├── booking.php                # Booking confirmation
+├── dashboard.php              # User dashboard
+├── admin-panel.php            # Admin panel
+├── wishlist.php               # User wishlist
+├── profile.php                # User profile
+├── contact.php                # Contact page
+├── logout.php                 # Logout handler
+└── README.md
+```
 
 ## Pages
 
-| Page | URL | Description |
-|------|-----|-------------|
-| Dashboard | `/` | IoT sensor data overview with live cards and charts |
-| AI Analysis | `/ai-analysis` | Anomaly detection results with manual testing |
-| Blockchain | `/blockchain` | Chain visualization and block explorer |
-| Device Auth | `/devices` | Zero-trust device authentication panel |
+| Page | Description |
+|---|---|
+| `index.php` | Homepage with hero video, trending products, categories, showcase, reviews, stats |
+| `login.php` | Glassmorphism sign-in with video background |
+| `register.php` | Account creation with glass UI |
+| `products.php` | Product listing with filters, sorting, infinite scroll |
+| `product-details.php` | Product detail with gallery, booking calculator, reviews |
+| `booking.php` | Booking confirmation page |
+| `dashboard.php` | User dashboard with stats and booking history |
+| `wishlist.php` | Saved products |
+| `profile.php` | Account settings and password change |
+| `contact.php` | Contact form with info cards |
+| `admin-panel.php` | Full admin dashboard with analytics |
 
-## API Endpoints
+## Design Inspiration
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/sensor-data` | Get edge-processed sensor readings |
-| POST | `/api/ai-predict` | Run AI prediction on single data point |
-| GET | `/api/ai-batch-predict` | Batch AI predictions on sensor data |
-| GET | `/api/blockchain/chain` | Get the full blockchain |
-| POST | `/api/blockchain/add` | Add a new block |
-| GET | `/api/devices` | Get all device information |
-| POST | `/api/devices/verify` | Verify a device (zero-trust) |
-| POST | `/api/devices/block` | Block a device |
-| GET | `/api/devices/auth-log` | Get authentication log |
-| GET | `/api/edge/stats` | Get edge computing statistics |
-| GET | `/api/pipeline` | Run full integration pipeline |
+- Apple product websites (clean, minimal)
+- Airbnb premium UI (card layouts, smooth interactions)
+- Tesla cinematic scrolling (video backgrounds, parallax)
 
-## Technologies Used
+## Categories
 
-- **Backend:** Python, Flask
-- **AI/ML:** scikit-learn (Isolation Forest)
-- **Security:** SHA-256 hashing, Zero-Trust Architecture
-- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
-- **Charts:** Chart.js
-- **Icons:** Lucide Icons
-- **Fonts:** Google Fonts (Inter, JetBrains Mono)
+Electronics | Cameras | Bikes | Gaming | Furniture | Fashion | Projectors | Speakers | Event Items | Daily Use
 
 ## License
 
-This project is created for academic and research demonstration purposes.
+This project is for educational purposes.
