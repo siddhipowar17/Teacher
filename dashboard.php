@@ -3,13 +3,28 @@ $pageTitle = 'Dashboard';
 require_once 'includes/header.php';
 requireLogin();
 
-$userId = $_SESSION['user_id'];
+$userId = intval($_SESSION['user_id']);
 
 // Get user stats
-$bookingCount = $conn->query("SELECT COUNT(*) as cnt FROM bookings WHERE user_id = $userId")->fetch_assoc()['cnt'];
-$activeRentals = $conn->query("SELECT COUNT(*) as cnt FROM bookings WHERE user_id = $userId AND status = 'active'")->fetch_assoc()['cnt'];
-$wishlistCount = $conn->query("SELECT COUNT(*) as cnt FROM wishlist WHERE user_id = $userId")->fetch_assoc()['cnt'];
-$totalSpent = $conn->query("SELECT COALESCE(SUM(total_price), 0) as total FROM bookings WHERE user_id = $userId AND payment_status = 'paid'")->fetch_assoc()['total'];
+$bcStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM bookings WHERE user_id = ?");
+$bcStmt->bind_param("i", $userId);
+$bcStmt->execute();
+$bookingCount = $bcStmt->get_result()->fetch_assoc()['cnt'];
+
+$arStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM bookings WHERE user_id = ? AND status = 'active'");
+$arStmt->bind_param("i", $userId);
+$arStmt->execute();
+$activeRentals = $arStmt->get_result()->fetch_assoc()['cnt'];
+
+$wcStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM wishlist WHERE user_id = ?");
+$wcStmt->bind_param("i", $userId);
+$wcStmt->execute();
+$wishlistCount = $wcStmt->get_result()->fetch_assoc()['cnt'];
+
+$tsStmt = $conn->prepare("SELECT COALESCE(SUM(total_price), 0) as total FROM bookings WHERE user_id = ? AND payment_status = 'paid'");
+$tsStmt->bind_param("i", $userId);
+$tsStmt->execute();
+$totalSpent = $tsStmt->get_result()->fetch_assoc()['total'];
 
 // Get recent bookings
 $bookingsStmt = $conn->prepare("SELECT b.*, p.name as product_name, p.slug FROM bookings b JOIN products p ON b.product_id = p.id WHERE b.user_id = ? ORDER BY b.created_at DESC LIMIT 10");
@@ -90,7 +105,7 @@ $recentlyViewed = $rvStmt->get_result();
                         <?php while ($b = $bookings->fetch_assoc()): ?>
                         <tr>
                             <td>
-                                <a href="product-details.php?slug=<?php echo $b['slug']; ?>" style="color: var(--accent); font-weight: 600;">
+                                <a href="product-details.php?slug=<?php echo htmlspecialchars($b['slug']); ?>" style="color: var(--accent); font-weight: 600;">
                                     <?php echo htmlspecialchars($b['product_name']); ?>
                                 </a>
                             </td>
@@ -122,14 +137,14 @@ $recentlyViewed = $rvStmt->get_result();
                 <div class="col-lg-3 col-md-6">
                     <div class="product-card hover-lift">
                         <div class="product-card-image">
-                            <img src="https://picsum.photos/seed/<?php echo $rv['slug']; ?>/400/300" alt="<?php echo htmlspecialchars($rv['name']); ?>">
+                            <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($rv['slug']); ?>/400/300" alt="<?php echo htmlspecialchars($rv['name']); ?>">
                         </div>
                         <div class="product-card-body">
                             <div class="product-card-category"><?php echo htmlspecialchars($rv['category_name']); ?></div>
                             <h3 class="product-card-title"><?php echo htmlspecialchars($rv['name']); ?></h3>
                             <div class="product-card-footer">
                                 <div class="product-price">$<?php echo number_format($rv['price_per_day'], 2); ?> <span>/day</span></div>
-                                <a href="product-details.php?slug=<?php echo $rv['slug']; ?>" class="btn-rent">View</a>
+                                <a href="product-details.php?slug=<?php echo htmlspecialchars($rv['slug']); ?>" class="btn-rent">View</a>
                             </div>
                         </div>
                     </div>

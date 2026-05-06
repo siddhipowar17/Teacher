@@ -93,7 +93,7 @@ if (isLoggedIn()) {
                     <select class="filter-select w-100" id="categoryFilter">
                         <option value="">All Categories</option>
                         <?php while ($c = $allCats->fetch_assoc()): ?>
-                            <option value="<?php echo $c['slug']; ?>" <?php echo $category === $c['slug'] ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($c['slug']); ?>" <?php echo $category === $c['slug'] ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($c['name']); ?>
                             </option>
                         <?php endwhile; ?>
@@ -130,7 +130,7 @@ if (isLoggedIn()) {
                 <div class="col-lg-3 col-md-6" data-aos="fade-up">
                     <div class="product-card hover-lift">
                         <div class="product-card-image">
-                            <img src="https://picsum.photos/seed/<?php echo $product['slug']; ?>/400/300" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                            <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($product['slug']); ?>/400/300" alt="<?php echo htmlspecialchars($product['name']); ?>">
                             <?php if ($product['featured']): ?>
                                 <span class="product-card-badge">Featured</span>
                             <?php endif; ?>
@@ -154,7 +154,7 @@ if (isLoggedIn()) {
                                     $<?php echo number_format($product['price_per_day'], 2); ?>
                                     <span>/day</span>
                                 </div>
-                                <a href="product-details.php?slug=<?php echo $product['slug']; ?>" class="btn-rent">Rent Now</a>
+                                <a href="product-details.php?slug=<?php echo htmlspecialchars($product['slug']); ?>" class="btn-rent">Rent Now</a>
                             </div>
                         </div>
                     </div>

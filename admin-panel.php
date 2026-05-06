@@ -4,6 +4,10 @@ requireAdmin();
 
 $currentUser = getCurrentUser();
 $activeTab = $_GET['tab'] ?? 'dashboard';
+$allowedTabs = ['dashboard', 'products', 'bookings', 'users', 'messages', 'analytics'];
+if (!in_array($activeTab, $allowedTabs, true)) {
+    $activeTab = 'dashboard';
+}
 
 // Dashboard Stats
 $totalUsers = $conn->query("SELECT COUNT(*) as cnt FROM users")->fetch_assoc()['cnt'];
@@ -17,7 +21,10 @@ $unreadMessages = $conn->query("SELECT COUNT(*) as cnt FROM contact_messages WHE
 $monthlyRevenue = [];
 for ($i = 5; $i >= 0; $i--) {
     $month = date('Y-m', strtotime("-$i months"));
-    $rev = $conn->query("SELECT COALESCE(SUM(total_price), 0) as total FROM bookings WHERE DATE_FORMAT(created_at, '%Y-%m') = '$month' AND payment_status = 'paid'")->fetch_assoc()['total'];
+    $revStmt = $conn->prepare("SELECT COALESCE(SUM(total_price), 0) as total FROM bookings WHERE DATE_FORMAT(created_at, '%Y-%m') = ? AND payment_status = 'paid'");
+    $revStmt->bind_param("s", $month);
+    $revStmt->execute();
+    $rev = $revStmt->get_result()->fetch_assoc()['total'];
     $monthlyRevenue[] = ['month' => date('M', strtotime("-$i months")), 'revenue' => floatval($rev)];
 }
 
@@ -33,23 +40,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'update_booking_status') {
         $bookingId = intval($_POST['booking_id']);
-        $status = $_POST['status'];
-        $conn->query("UPDATE bookings SET status = '$status' WHERE id = $bookingId");
+        $status = $_POST['status'] ?? '';
+        $allowedStatuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled'];
+        if (in_array($status, $allowedStatuses, true)) {
+            $stmt = $conn->prepare("UPDATE bookings SET status = ? WHERE id = ?");
+            $stmt->bind_param("si", $status, $bookingId);
+            $stmt->execute();
+        }
         header("Location: admin-panel.php?tab=bookings&msg=updated");
         exit;
     }
 
     if ($action === 'delete_product') {
         $productId = intval($_POST['product_id']);
-        $conn->query("DELETE FROM products WHERE id = $productId");
+        $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+        $stmt->bind_param("i", $productId);
+        $stmt->execute();
         header("Location: admin-panel.php?tab=products&msg=deleted");
         exit;
     }
 
     if ($action === 'update_user_role') {
         $userId = intval($_POST['user_id']);
-        $role = $_POST['role'];
-        $conn->query("UPDATE users SET role = '$role' WHERE id = $userId");
+        $role = $_POST['role'] ?? '';
+        $allowedRoles = ['user', 'admin'];
+        if (in_array($role, $allowedRoles, true)) {
+            $stmt = $conn->prepare("UPDATE users SET role = ? WHERE id = ?");
+            $stmt->bind_param("si", $role, $userId);
+            $stmt->execute();
+        }
         header("Location: admin-panel.php?tab=users&msg=updated");
         exit;
     }
@@ -195,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <td><i class="fas fa-star text-warning"></i> <?php echo $p['rating']; ?></td>
                             <td><span class="status-badge <?php echo $p['availability']; ?>"><?php echo ucfirst($p['availability']); ?></span></td>
                             <td>
-                                <a href="product-details.php?slug=<?php echo $p['slug']; ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-eye"></i></a>
+                                <a href="product-details.php?slug=<?php echo htmlspecialchars($p['slug']); ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-eye"></i></a>
                                 <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this product?');">
                                     <input type="hidden" name="action" value="delete_product">
                                     <input type="hidden" name="product_id" value="<?php echo $p['id']; ?>">
@@ -474,7 +493,10 @@ if (statusCtx) {
     $statusData = [];
     $statuses = ['pending', 'confirmed', 'active', 'completed', 'cancelled'];
     foreach ($statuses as $s) {
-        $cnt = $conn->query("SELECT COUNT(*) as cnt FROM bookings WHERE status = '$s'")->fetch_assoc()['cnt'];
+        $sStmt = $conn->prepare("SELECT COUNT(*) as cnt FROM bookings WHERE status = ?");
+        $sStmt->bind_param("s", $s);
+        $sStmt->execute();
+        $cnt = $sStmt->get_result()->fetch_assoc()['cnt'];
         $statusData[$s] = $cnt;
     }
     ?>

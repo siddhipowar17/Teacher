@@ -54,12 +54,12 @@ $similar = $simStmt->get_result();
             <!-- Product Gallery -->
             <div class="col-lg-6" data-aos="fade-right">
                 <div class="product-gallery">
-                    <img class="product-main-image" src="https://picsum.photos/seed/<?php echo $product['slug']; ?>/800/600" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                    <img class="product-main-image" src="https://picsum.photos/seed/<?php echo htmlspecialchars($product['slug']); ?>/800/600" alt="<?php echo htmlspecialchars($product['name']); ?>">
                 </div>
                 <div class="product-thumbnails mt-3">
                     <?php for ($i = 1; $i <= 4; $i++): ?>
                     <div class="product-thumb <?php echo $i === 1 ? 'active' : ''; ?>">
-                        <img src="https://picsum.photos/seed/<?php echo $product['slug'] . '-' . $i; ?>/200/200" alt="Thumbnail <?php echo $i; ?>">
+                        <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($product['slug']) . '-' . $i; ?>/200/200" alt="Thumbnail <?php echo $i; ?>">
                     </div>
                     <?php endfor; ?>
                 </div>
@@ -180,14 +180,14 @@ $similar = $simStmt->get_result();
                 <div class="col-lg-3 col-md-6" data-aos="fade-up">
                     <div class="product-card hover-lift">
                         <div class="product-card-image">
-                            <img src="https://picsum.photos/seed/<?php echo $sim['slug']; ?>/400/300" alt="<?php echo htmlspecialchars($sim['name']); ?>">
+                            <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($sim['slug']); ?>/400/300" alt="<?php echo htmlspecialchars($sim['name']); ?>">
                         </div>
                         <div class="product-card-body">
                             <div class="product-card-category"><?php echo htmlspecialchars($sim['category_name']); ?></div>
                             <h3 class="product-card-title"><?php echo htmlspecialchars($sim['name']); ?></h3>
                             <div class="product-card-footer">
                                 <div class="product-price">$<?php echo number_format($sim['price_per_day'], 2); ?> <span>/day</span></div>
-                                <a href="product-details.php?slug=<?php echo $sim['slug']; ?>" class="btn-rent">View</a>
+                                <a href="product-details.php?slug=<?php echo htmlspecialchars($sim['slug']); ?>" class="btn-rent">View</a>
                             </div>
                         </div>
                     </div>

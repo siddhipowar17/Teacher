@@ -22,7 +22,7 @@ $wishlistItems = $stmt->get_result();
             <div class="col-lg-3 col-md-6" data-aos="fade-up" id="wishlist-item-<?php echo $item['id']; ?>">
                 <div class="product-card hover-lift">
                     <div class="product-card-image">
-                        <img src="https://picsum.photos/seed/<?php echo $item['slug']; ?>/400/300" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                        <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($item['slug']); ?>/400/300" alt="<?php echo htmlspecialchars($item['name']); ?>">
                         <button class="product-card-wishlist wishlist-toggle active" data-product-id="<?php echo $item['id']; ?>">
                             <i class="fas fa-heart"></i>
                         </button>
@@ -34,7 +34,7 @@ $wishlistItems = $stmt->get_result();
                             <div class="product-price">
                                 $<?php echo number_format($item['price_per_day'], 2); ?> <span>/day</span>
                             </div>
-                            <a href="product-details.php?slug=<?php echo $item['slug']; ?>" class="btn-rent">Rent Now</a>
+                            <a href="product-details.php?slug=<?php echo htmlspecialchars($item['slug']); ?>" class="btn-rent">Rent Now</a>
                         </div>
                     </div>
                 </div>

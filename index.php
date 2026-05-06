@@ -85,7 +85,7 @@ if (isLoggedIn()) {
             <div class="col-lg-3 col-md-6">
                 <div class="product-card hover-lift">
                     <div class="product-card-image">
-                        <img src="https://picsum.photos/seed/<?php echo $product['slug']; ?>/400/300" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                        <img src="https://picsum.photos/seed/<?php echo htmlspecialchars($product['slug']); ?>/400/300" alt="<?php echo htmlspecialchars($product['name']); ?>">
                         <?php if ($product['featured']): ?>
                             <span class="product-card-badge">Featured</span>
                         <?php endif; ?>
@@ -109,7 +109,7 @@ if (isLoggedIn()) {
                                 $<?php echo number_format($product['price_per_day'], 2); ?>
                                 <span>/day</span>
                             </div>
-                            <a href="product-details.php?slug=<?php echo $product['slug']; ?>" class="btn-rent">Rent Now</a>
+                            <a href="product-details.php?slug=<?php echo htmlspecialchars($product['slug']); ?>" class="btn-rent">Rent Now</a>
                         </div>
                     </div>
                 </div>
@@ -137,7 +137,7 @@ if (isLoggedIn()) {
         <div class="row g-4">
             <?php while ($cat = $catResult->fetch_assoc()): ?>
             <div class="col-lg-2 col-md-4 col-6" data-aos="fade-up" data-aos-delay="<?php echo $cat['id'] * 50; ?>">
-                <a href="products.php?cat=<?php echo $cat['slug']; ?>" class="category-card d-block">
+                <a href="products.php?cat=<?php echo htmlspecialchars($cat['slug']); ?>" class="category-card d-block">
                     <div class="category-card-content">
                         <div class="category-icon">
                             <i class="fas <?php echo $cat['icon']; ?>"></i>
