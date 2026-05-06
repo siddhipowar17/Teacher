@@ -60,7 +60,7 @@ while ($product = $products->fetch_assoc()) {
     $html .= '<div class="col-lg-3 col-md-6" data-aos="fade-up">';
     $html .= '<div class="product-card hover-lift">';
     $html .= '<div class="product-card-image">';
-    $html .= '<img src="https://picsum.photos/seed/' . $product['slug'] . '/400/300" alt="' . htmlspecialchars($product['name']) . '">';
+    $html .= '<img src="https://picsum.photos/seed/' . htmlspecialchars($product['slug']) . '/400/300" alt="' . htmlspecialchars($product['name']) . '">';
     if ($product['featured']) {
         $html .= '<span class="product-card-badge">Featured</span>';
     }
@@ -73,7 +73,7 @@ while ($product = $products->fetch_assoc()) {
     $html .= '<span class="rating-text">(' . $product['total_reviews'] . ')</span></div>';
     $html .= '<div class="product-card-footer">';
     $html .= '<div class="product-price">$' . number_format($product['price_per_day'], 2) . ' <span>/day</span></div>';
-    $html .= '<a href="product-details.php?slug=' . $product['slug'] . '" class="btn-rent">Rent Now</a>';
+    $html .= '<a href="product-details.php?slug=' . htmlspecialchars($product['slug']) . '" class="btn-rent">Rent Now</a>';
     $html .= '</div></div></div></div>';
 }
 

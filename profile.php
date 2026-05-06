@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="profile-card" data-aos="fade-up">
                     <div class="profile-avatar-large">
-                        <?php echo strtoupper($user['full_name'][0]); ?>
+                        <?php echo strtoupper(substr($user['full_name'] ?? 'U', 0, 1)); ?>
                     </div>
                     <h3 class="mb-1"><?php echo htmlspecialchars($user['full_name']); ?></h3>
                     <p class="text-muted mb-4"><?php echo htmlspecialchars($user['email']); ?></p>
