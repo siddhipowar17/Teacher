@@ -1,0 +1,401 @@
+/* ============================================
+   LuxeRent - Animation Styles
+   GSAP + AOS + Custom Animations
+   ============================================ */
+
+/* ---------- Fade Animations ---------- */
+.fade-up {
+    opacity: 0;
+    transform: translateY(40px);
+}
+
+.fade-down {
+    opacity: 0;
+    transform: translateY(-40px);
+}
+
+.fade-left {
+    opacity: 0;
+    transform: translateX(-40px);
+}
+
+.fade-right {
+    opacity: 0;
+    transform: translateX(40px);
+}
+
+.fade-in {
+    opacity: 0;
+}
+
+.animated {
+    opacity: 1;
+    transform: translate(0, 0);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ---------- Hover Effects ---------- */
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+}
+
+.hover-scale {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+/* ---------- Floating Animation ---------- */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.floating {
+    animation: float 4s ease-in-out infinite;
+}
+
+.floating-delay-1 { animation-delay: 0.5s; }
+.floating-delay-2 { animation-delay: 1s; }
+.floating-delay-3 { animation-delay: 1.5s; }
+
+/* ---------- Gradient Animation ---------- */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
+}
+
+/* ---------- Pulse Animation ---------- */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ---------- Glow Effect ---------- */
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.6); }
+}
+
+.glow-effect {
+    animation: glow 3s ease-in-out infinite;
+}
+
+/* ---------- Text Reveal ---------- */
+@keyframes textReveal {
+    0% {
+        clip-path: inset(0 100% 0 0);
+    }
+    100% {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+.text-reveal {
+    animation: textReveal 1s ease forwards;
+}
+
+/* ---------- Slide In ---------- */
+@keyframes slideInLeft {
+    from { transform: translateX(-100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in-left { animation: slideInLeft 0.8s ease forwards; }
+.slide-in-right { animation: slideInRight 0.8s ease forwards; }
+.slide-in-up { animation: slideInUp 0.8s ease forwards; }
+
+/* ---------- Scale In ---------- */
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.scale-in {
+    animation: scaleIn 0.6s ease forwards;
+}
+
+/* ---------- Blur In ---------- */
+@keyframes blurIn {
+    from { filter: blur(10px); opacity: 0; }
+    to { filter: blur(0); opacity: 1; }
+}
+
+.blur-in {
+    animation: blurIn 0.8s ease forwards;
+}
+
+/* ---------- Rotate In ---------- */
+@keyframes rotateIn {
+    from { transform: rotate(-10deg) scale(0.9); opacity: 0; }
+    to { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+.rotate-in {
+    animation: rotateIn 0.6s ease forwards;
+}
+
+/* ---------- Shimmer Effect ---------- */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.shimmer {
+    background: linear-gradient(90deg,
+        var(--mid-gray) 25%,
+        var(--light-gray) 50%,
+        var(--mid-gray) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* ---------- Typewriter Effect ---------- */
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    50% { border-color: transparent; }
+}
+
+.typewriter {
+    overflow: hidden;
+    border-right: 3px solid var(--accent);
+    white-space: nowrap;
+    animation:
+        typewriter 3s steps(40) 1s forwards,
+        blink 0.75s step-end infinite;
+}
+
+/* ---------- Parallax Layer ---------- */
+.parallax-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.parallax-layer {
+    will-change: transform;
+}
+
+/* ---------- Card Hover Tilt ---------- */
+.tilt-card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.tilt-card:hover {
+    transform: rotateX(5deg) rotateY(5deg);
+}
+
+/* ---------- Counter Animation ---------- */
+.counter-animate {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Image Reveal ---------- */
+.image-reveal {
+    position: relative;
+    overflow: hidden;
+}
+
+.image-reveal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-1);
+    z-index: 1;
+    transform-origin: right;
+    transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.image-reveal.revealed::before {
+    transform: scaleX(0);
+}
+
+/* ---------- Magnetic Button ---------- */
+.magnetic-btn {
+    transition: transform 0.3s ease;
+    will-change: transform;
+}
+
+/* ---------- Stagger Children ---------- */
+.stagger-children > * {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.stagger-children.animated > *:nth-child(1) { transition-delay: 0.1s; }
+.stagger-children.animated > *:nth-child(2) { transition-delay: 0.2s; }
+.stagger-children.animated > *:nth-child(3) { transition-delay: 0.3s; }
+.stagger-children.animated > *:nth-child(4) { transition-delay: 0.4s; }
+.stagger-children.animated > *:nth-child(5) { transition-delay: 0.5s; }
+.stagger-children.animated > *:nth-child(6) { transition-delay: 0.6s; }
+
+.stagger-children.animated > * {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ---------- Section Transitions ---------- */
+.section-reveal {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.section-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ---------- Scroll Snap ---------- */
+.scroll-snap-container {
+    scroll-snap-type: y proximity;
+}
+
+.scroll-snap-section {
+    scroll-snap-align: start;
+}
+
+/* ---------- Typography Animation ---------- */
+.split-text .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.split-text.animated .char {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.5s ease;
+}
+
+/* ---------- Video Section Transitions ---------- */
+.video-section-enter {
+    clip-path: circle(0% at 50% 50%);
+    transition: clip-path 1.5s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.video-section-enter.visible {
+    clip-path: circle(150% at 50% 50%);
+}
+
+/* ---------- Card Glass Float ---------- */
+.glass-float {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    transition: var(--transition);
+}
+
+.glass-float:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- Progress Ring ---------- */
+@keyframes progressRing {
+    from { stroke-dashoffset: 283; }
+}
+
+.progress-ring circle {
+    transition: stroke-dashoffset 1s ease;
+}
+
+/* ---------- Notification Slide ---------- */
+@keyframes notifSlide {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.notification-toast {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 16px 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    animation: notifSlide 0.4s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.notification-toast.hide {
+    animation: notifSlide 0.4s ease reverse forwards;
+}
+
+/* ---------- Skeleton Loading ---------- */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+    height: 14px;
+    margin-bottom: 8px;
+}
+
+.skeleton-title {
+    height: 24px;
+    margin-bottom: 12px;
+    width: 60%;
+}
+
+.skeleton-image {
+    height: 240px;
+    margin-bottom: 16px;
+}
+
+/* ---------- Smooth Page Transitions ---------- */
+.page-transition-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.page-transition-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.6s ease;
+}
